@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "Vlad Ciurea a fost aici"
 
 cat /etc/hosts | while read ip nume
 do
