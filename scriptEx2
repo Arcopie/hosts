@@ -1,0 +1,27 @@
+#!/bin/bash
+
+
+cat /etc/hosts | while read ip nume
+do
+    # daca linia incepe cu # SAU este goala (-z verifica daca ip e gol)
+    if [[ "$ip" == "#"* ]] || [[ -z "$ip" ]]; then
+        continue
+    fi
+# ignoram localhost
+ if [[ "$ip" == "127.0.0.1" ]]; then
+        continue
+    fi  
+
+#executam nslookup, pastram doar liniile care au in nume Address
+#-v face operatia inversa, pastreaza liniile care NU au #
+# awk print $2 pastreaza al doilea argument Address: 192.168.0.255 ia doar 192....
+
+    ip_real=$(nslookup $nume 8.8.8.8 | grep "Address" | grep -v "#" | awk '{print $2}'| head -n 1)
+#folosim DNS ul de la google ca sa nu luam mereu valorile gresite din /etc/hosts
+#DNS ul afiseaza si adresa ipv6 asa ca luam doar prima linie, adresa ipv4
+
+#verificare daca ip_real e diferit de zero si daca este egal cu ip ul din /etc/hosts
+    if [[ -n "$ip_real" ]] && [[ "$ip" != "$ip_real" ]]; then
+        echo "Bogus IP for $nume in /etc/hosts!"
+    fi
+done
